@@ -10,11 +10,15 @@
 
 
 	use Backend\Facades\BackendAuth;
-	use Illuminate\Support\Facades\Log;
+    use Carbon\Carbon;
+    use Illuminate\Support\Facades\File;
+    use Illuminate\Support\Facades\Log;
 	use RainLab\User\Facades\Auth;
 
 	trait Loggable {
-		protected function getLogUser() {
+	    protected $customLog = null;
+
+	    protected function getLogUser() {
 			$user = '';
 			if (BackendAuth::check()) {
 				$user .= 'Backend User '.BackendAuth::getUser()->login;
@@ -31,7 +35,7 @@
 		public function beforeSave () {
 			foreach ($this->getAttributes() as $key => $value) {
 				if ($this->$key != $this->getOriginal($key)) {
-					Log::info(get_class($this).'# '.
+					$this->log(get_class($this).'# '.
 							$this->id.': '.
 							$key.' changed from '.
 							$this->getOriginal($key).' to '.
@@ -42,16 +46,30 @@
 		}
 
 		public function beforeDelete () {
-			Log::info(get_class($this).'# '.
+			$this->log(get_class($this).'# '.
 					$this->id.': '.
 					'is being deleted by '.
 					$this->getLogUser());
 		}
 
 		public function afterCreate () {
-			Log::info(get_class($this).'# '.
+			$this->log(get_class($this).'# '.
 					$this->id.': '.
 					'was created by '.
 					$this->getLogUser());
 		}
+
+        protected function log($string) {
+		    if (!$this->customLog) {
+		        Log::info($string);
+            } else {
+		        if (!File::exists(storage_path('logs/'.$this->customLog))) {
+                    if (!File::exists(storage_path('logs/'.$this->customLog))) {
+                        File::put(storage_path('logs/'.$this->customLog), '');
+                    }
+                }
+
+                File::append(storage_path('logs/'.$this->customLog), '['.Carbon::now()->format('Y-m-d h:i:s').'] '.$string.PHP_EOL);
+            }
+        }
 	}
