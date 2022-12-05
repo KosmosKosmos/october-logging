@@ -1,12 +1,14 @@
 {
-    "name": "kosmoskosmos/loggable",
+    "name": "kosmoskosmos/loggable-plugin",
     "description": "Logging Trait for octobercms models",
-    "type": "octobercms-plugin",
+    "type": "october-plugin",
     "authors": [
         {
             "name": "Andreas Kosmowicz",
             "email": "kosmonowt@googlemail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "composer/installers": "~1.0"
+    }
 }
